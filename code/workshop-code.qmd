@@ -45,7 +45,11 @@ library(MuMIn) # model selection
 
 # read in your data here
 
-
+drought_exp <- read_xlsx(
+  here("data", 
+       "Valliere_etal_EcoApps_Data.xlsx"),
+  sheet = "First Harvest"
+)
 
 ```
 
@@ -77,12 +81,12 @@ Data source: Valliere, Justin; Zhang, Jacqueline; Sharifi, M.; Rundel, Philip (2
 ```{r}
 #| label: data cleaning
 
-# 
-drought_exp_clean <- drought_exp 
-  # 
-  clean_names() 
-  # 
-  mutate(species_name = case_match(
+# make object drought_exp_clean
+drought_exp_clean <- drought_exp |> 
+  # clean names: makes lowercase and underscores
+  clean_names() |>
+  # Rename columns to specific name
+  mutate(species_name = recode_values(
     species,
     "ENCCAL" ~ "Encelia californica", # bush sunflower
     "ESCCAL" ~ "Eschscholzia californica", # California poppy
@@ -91,14 +95,14 @@ drought_exp_clean <- drought_exp
     "SALLEU" ~ "Salvia leucophylla", # purple sage
     "STIPUL" ~ "Stipa pulchra", # purple needlegrass
     "LOTSCO" ~ "Lotus scoparius" # deerweed
-  )) 
-  # 
+  )) |>
+  # Renames Columns to full name
   mutate(water_treatment = case_match(
     water,
     "WW" ~ "Well watered",
     "DS" ~ "Drought stressed"
-  ))  
-  # 
+  ))  |>
+  # ordering the columns in alphabetical order
   mutate(species_name = as_factor(species_name),
          species_name = fct_relevel(species_name,
                                     "Lotus scoparius",
@@ -107,12 +111,12 @@ drought_exp_clean <- drought_exp
                                     "Encelia californica",
                                     "Stipa pulchra",
                                     "Eschscholzia californica",
-                                    "Grindelia camporum")) 
+                                    "Grindelia camporum")) |>
   mutate(water_treatment = as_factor(water_treatment),
          water_treatment = fct_relevel(water_treatment,
                                        "Drought stressed",
-                                       "Well watered")) 
-  #
+                                       "Well watered")) |>
+  # keep only species name, water treatment, sla , and total g column
   select(species_name, water_treatment, sla, total_g)
 ```
 
